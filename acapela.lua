@@ -168,7 +168,7 @@ function Acapela:run()
 
     -- Check if file exists
     if self.cache and file_exists(self.DIRECTORY..self.filename) then
-        return self.filename
+        return self.DIRECTORY..self.filename
     else
         --Get all the Get params and encode them
         get_params = ''
