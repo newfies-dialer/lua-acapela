@@ -66,6 +66,18 @@ function wget(url, outputfile)
     return table.concat(text,'')
 end
 
+--
+-- URL Encoder
+--
+function url_encode(str)
+  if (str) then
+    str = string.gsub (str, "\n", "\r\n")
+    str = string.gsub (str, "([^%w ])",
+        function (c) return string.format ("%%%02X", string.byte(c)) end)
+    str = string.gsub (str, " ", "+")
+  end
+  return str
+end
 
 --
 -- Acapela Class
@@ -142,7 +154,9 @@ function Acapela:prepare(text, lang, gender, intonation)
         prot_vers = '2',
         cl_pwd = self.APPLICATION_PASSWORD,
         req_asw_type = 'STREAM',
+        --req_text = text,
         req_text = '\\vct=100\\ \\spd=160\\ '..text,
+        --req_text = 'Hello+how+are+you',
     }
 end
 
@@ -158,27 +172,28 @@ function Acapela:run()
     if self.cache and file_exists(self.DIRECTORY..self.filename) then
         return self.filename
     else
-        --encdata = parse.urlencode(self.data)
-        --request.urlretrieve(self.SERVICE_URL, self.DIRECTORY..self.filename, data=encdata)
-        --get_params = table.concat(self.data, "&")
+        --Get all the Get params and encode them
         get_params = ''
         for k, v in pairs(self.data) do
             if get_params ~= '' then
                 get_params = get_params..'&'
             end
-            get_params = get_params..tostring(k)..'='..v
+            get_params = get_params..tostring(k)..'='..url_encode(v)
         end
-
-        print(get_params)
-        print(inspect(self.data))
 
         wget(self.SERVICE_URL..'?'..get_params, self.DIRECTORY..self.filename)
+
+        -- Debug
+        -- print(self.SERVICE_URL..'?'..get_params)
+        -- print(inspect(self.data))
+
         if file_exists(self.DIRECTORY..self.filename) then
-            print("Success : "..self.DIRECTORY..self.filename)
+            return self.DIRECTORY..self.filename
         else
-            print("Didn't work!!!")
+            --Error
+            return false
         end
-        return self.DIRECTORY..self.filename
+
     end
 end
 
@@ -203,7 +218,7 @@ if true then
     end
 
     directory = '/tmp/'
-    text = 'Please say this text'
+    text = 'Please say this text via Acapela'
     language = 'EN'
 
 
@@ -213,6 +228,5 @@ if true then
     tts_acapela:prepare(text, language, ACAPELA_GENDER, ACAPELA_INTONATION)
     output_filename = tts_acapela:run()
 
-    print('Recorded TTS to '..directory..output_filename)
-
+    print('Recorded TTS : '..output_filename)
 end
