@@ -5,6 +5,7 @@ lua-acapela
 :Author: Arezqui Belaid
 :Description: Lua wrapper for text-to-speech synthesis with Acapela
 :Company: Developed by Star2Billing http://www.star2billing.com
+:License: MIT
 
 
 Lua Acapela Wrapper
@@ -27,11 +28,16 @@ Quickstart
     APPLICATION_PASSWORD = 'XXXXXXXX'
     SERVICE_URL = 'http://vaas.acapela-group.com/Services/Synthesizer'
 
-    tts_acapela = acapela.Acapela(ACCOUNT_LOGIN, APPLICATION_LOGIN, APPLICATION_PASSWORD, SERVICE_URL, '22k', '/tmp/')
-    tts_acapela.prepare(text=u"Hola! Buenos días", lang='ES', gender='W', intonation='NORMAL')
-    output_filename = tts_acapela.run()
+    tts_acapela = Acapela(ACCOUNT_LOGIN, APPLICATION_LOGIN, APPLICATION_PASSWORD, SERVICE_URL, QUALITY, directory)
 
-    print("Recorded TTS to %s" % output_filename)
+    TEXT="Hola! Buenos días"
+    LANG = 'ES'
+    ACAPELA_GENDER = 'W'
+    ACAPELA_INTONATION = 'NORMAL'
+    tts_acapela:prepare(TEXT, LANG, ACAPELA_GENDER, ACAPELA_INTONATION)
+    output_filename = tts_acapela:run()
+
+    print("Recorded TTS = "..output_filename)
 
 
 Features
@@ -45,16 +51,6 @@ Features
 * Provide voices of different gender and intonation
 
 
-Example usage and output
-------------------------
-
-::
-
-  $ Usage: lua-acapela -acclogin <accountlogin> -applogin <applicationlogin> -p <password> -t <text> [-q <quality>] [-d <directory>] [-url <service_url>] [-h]
-
-  $ Output : Recorded TTS to /tmp/ACAPELA-8895934760117809679-ES.mp3
-
-
 Feedback
 --------
 
@@ -66,12 +62,13 @@ http://github.com/areski/lua-acapela/issues
 Extra information
 -----------------
 
-Newfies-Dialer, an open source Auto Dialer software, uses this module to synthetize audio files being play to the end-user.
+Newfies-Dialer, an Open Source Voice BroadCasting Solution, uses this module to synthetize audio files being play to the end-user.
 Further information about Newfies-Dialer can be found at http://www.newfies-dialer.org
 
 This module is built and supported by Star2Billing : http://www.star2billing.com
 
 Similar library in Python : http://github.com/areski/python-acapela
+
 Similar library in Ruby : https://github.com/mheld/acapela-ruby
 
 
@@ -81,5 +78,3 @@ Source download
 The source code is currently available on github. Fork away!
 
 http://github.com/areski/lua-acapela
-
-
