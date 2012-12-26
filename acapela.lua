@@ -23,6 +23,9 @@
 -- SOFTWARE.
 
 local oo = require "loop.simple"
+local inspect = require 'inspect'
+require "md5"
+require "lfs"
 
 
 lua_acapela_version = '0.1.0'
@@ -72,16 +75,20 @@ end
 
 function Acapela:prepare(self, text, lang, gender, intonation)
     -- Prepare Acapela TTS
+    if string.len(text) == 0 then
+        return false
+    end
     lang = string.upper(lang)
     concatkey = text..'-'..lang..'-'..gender..'-'..intonation
-    key = self.TTS_ENGINE..''..tostring(hash(concatkey))
-    try:
-        req_voice = self.langs[lang][gender][intonation]..self.QUALITY
-    except:
-        req_voice = 'lucy22k'
+    hash = md5.sumhexa(concatkey)
+
+    key = self.TTS_ENGINE..'_'..hash
+    req_voice = self.langs[lang][gender][intonation]..self.QUALITY
+    --req_voice = 'lucy22k'
+    self.filename = key..'-'..lang..'.mp3'
 
     self.data = {
-        'cl_env': 'PYTHON_2.X',
+        'cl_env': 'LUA',
         'req_snd_id': key,
         'cl_login': self.ACCOUNT_LOGIN,
         'cl_vers': '1-30',
@@ -91,20 +98,19 @@ function Acapela:prepare(self, text, lang, gender, intonation)
         'prot_vers': '2',
         'cl_pwd': self.APPLICATION_PASSWORD,
         'req_asw_type': 'STREAM',
-        }
-    self.filename = key..'-'..lang..'.mp3'
-    self.data['req_text'] = '\\vct=100\\ \\spd=160\\ '..text.encode('utf-8')
+        'req_text': '\\vct=100\\ \\spd=160\\ '..text,
+    }
 end
 
-function Acapela:set_cache(self, value=True)
+function Acapela:set_cache(self, value)
     -- Enable Cache of file, if files already stored return this filename
     self.cache = value
 end
 
 function Acapela:run(self)
-    -- run will call acapela API and and produce audio"""
+    -- Run will call acapela API and reproduce audio
 
-    -- check if file exists
+    -- Check if file exists
     if self.cache and os.path.isfile(self.DIRECTORY..self.filename) then
         return self.filename
     else
