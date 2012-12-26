@@ -90,13 +90,14 @@ Acapela = oo.class{
 }
 
 
-function Acapela:__init(account_login, application_login, application_password, quality, directory)
+function Acapela:__init(account_login, application_login, application_password, url, quality, directory)
     -- constructor
     return oo.rawnew(self, {
         TTS_ENGINE = 'ACAPELA',
         ACCOUNT_LOGIN = account_login,
         APPLICATION_LOGIN = application_login,
         APPLICATION_PASSWORD = application_password,
+        SERVICE_URL = url,
         QUALITY = quality,
         DIRECTORY = directory or '',
     })
@@ -189,19 +190,27 @@ if true then
 
     --TODO: add parse init files
 
-    acclogin = 'LOGIN'
-    applogin = 'applogin'
-    password = 'password'
-    text = 'this is the text'
-    language = 'EN'
-    quality = '22k'
-    directory = '/tmp/'
+    require "acapela_config"
 
-    tts_acapela = Acapela(acclogin, applogin, password, url, quality, directory)
-    gender = 'W'
-    intonation = 'NORMAL'
+    if ACCOUNT_LOGIN == nil then
+        ACCOUNT_LOGIN = 'LOGIN'
+        APPLICATION_LOGIN = 'applogin'
+        APPLICATION_PASSWORD = 'password'
+        SERVICE_URL = 'http://vaas.acapela-group.com/Services/Synthesizer'
+        quality = '22k'
+        gender = 'W'
+        intonation = 'NORMAL'
+    end
+
+    directory = '/tmp/'
+    text = 'Please say this text'
+    language = 'EN'
+
+
+    tts_acapela = Acapela(ACCOUNT_LOGIN, APPLICATION_LOGIN, APPLICATION_PASSWORD, SERVICE_URL, QUALITY, directory)
+
     tts_acapela:set_cache(false)
-    tts_acapela:prepare(text, language, gender, intonation)
+    tts_acapela:prepare(text, language, ACAPELA_GENDER, ACAPELA_INTONATION)
     output_filename = tts_acapela:run()
 
     print('Recorded TTS to '..directory..output_filename)
