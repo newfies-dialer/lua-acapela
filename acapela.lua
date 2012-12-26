@@ -94,7 +94,6 @@ Acapela = oo.class{
     DIRECTORY = '/tmp/',
 
     -- Properties
-    TTS_ENGINE = nil,
     filename = nil,
     cache = true,
     data = {},
@@ -105,7 +104,6 @@ Acapela = oo.class{
 function Acapela:__init(account_login, application_login, application_password, url, quality, directory)
     -- constructor
     return oo.rawnew(self, {
-        TTS_ENGINE = 'ACAPELA',
         ACCOUNT_LOGIN = account_login,
         APPLICATION_LOGIN = application_login,
         APPLICATION_PASSWORD = application_password,
@@ -138,7 +136,7 @@ function Acapela:prepare(text, lang, gender, intonation)
     concatkey = text..'-'..lang..'-'..gender..'-'..intonation
     hash = md5.sumhexa(concatkey)
 
-    key = self.TTS_ENGINE..'_'..hash
+    key = 'acapela'..'_'..hash
     req_voice = self.langs[lang][gender][intonation]..self.QUALITY
     --req_voice = 'lucy22k'
     self.filename = key..'-'..lang..'.mp3'
