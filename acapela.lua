@@ -201,7 +201,7 @@ end
 --
 -- Test
 --
-if true then
+if false then
 
     --TODO: add parse init files
 
