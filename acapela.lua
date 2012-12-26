@@ -43,28 +43,8 @@ Acapela = oo.class{
     TTS_ENGINE = nil,
     filename = nil,
     cache = true,
-    data = {}
-}
-
-function Acapela:__init(account_login, application_login, application_password, service_url, quality, directory)
-    -- constructor
-    return oo.rawnew(self, {
-        TTS_ENGINE = 'ACAPELA'
-        ACCOUNT_LOGIN = account_login
-        APPLICATION_LOGIN = application_login
-        APPLICATION_PASSWORD = application_password
-        SERVICE_URL = service_url
-        QUALITY = quality
-        DIRECTORY = directory or ''
-    })
-end
-
-
-
-class Acapela(object):
-
-
-    -- Available voices list
+    data = {},
+        -- Available voices list
     -- http://www.acapela-vaas.com/ReleasedDocumentation/voices_list.php
     langs = {
         'EN': {'W': {'NORMAL': 'rachel'}, 'M': {'NORMAL': 'margaux'}},
@@ -74,71 +54,85 @@ class Acapela(object):
         'PT': {'W': {'NORMAL': 'celia'}},
         'BR': {'W': {'NORMAL': 'marcia'}},
         }
+}
 
 
-    function prepare(self, text, lang, gender, intonation)
-        -- Prepare Acapela TTS
-        lang = lang.upper()
-        concatkey = text..'-'..lang..'-'..gender..'-'..intonation
-        key = self.TTS_ENGINE..''..str(hash(concatkey))
-        try:
-            req_voice = self.langs[lang][gender][intonation]..self.QUALITY
-        except:
-            req_voice = 'lucy22k'
+function Acapela:__init(account_login, application_login, application_password, quality, directory)
+    -- constructor
+    return oo.rawnew(self, {
+        TTS_ENGINE = 'ACAPELA',
+        ACCOUNT_LOGIN = account_login,
+        APPLICATION_LOGIN = application_login,
+        APPLICATION_PASSWORD = application_password,
+        QUALITY = quality,
+        DIRECTORY = directory or '',
+    })
+end
 
-        self.data = {
-            'cl_env': 'PYTHON_2.X',
-            'req_snd_id': key,
-            'cl_login': self.ACCOUNT_LOGIN,
-            'cl_vers': '1-30',
-            'req_err_as_id3': 'yes',
-            'req_voice': req_voice,
-            'cl_app': self.APPLICATION_LOGIN,
-            'prot_vers': '2',
-            'cl_pwd': self.APPLICATION_PASSWORD,
-            'req_asw_type': 'STREAM',
-            }
-        self.filename = key..'-'..lang..'.mp3'
-        self.data['req_text'] = '\\vct=100\\ \\spd=160\\ '..text.encode('utf-8')
+
+function Acapela:prepare(self, text, lang, gender, intonation)
+    -- Prepare Acapela TTS
+    lang = string.upper(lang)
+    concatkey = text..'-'..lang..'-'..gender..'-'..intonation
+    key = self.TTS_ENGINE..''..tostring(hash(concatkey))
+    try:
+        req_voice = self.langs[lang][gender][intonation]..self.QUALITY
+    except:
+        req_voice = 'lucy22k'
+
+    self.data = {
+        'cl_env': 'PYTHON_2.X',
+        'req_snd_id': key,
+        'cl_login': self.ACCOUNT_LOGIN,
+        'cl_vers': '1-30',
+        'req_err_as_id3': 'yes',
+        'req_voice': req_voice,
+        'cl_app': self.APPLICATION_LOGIN,
+        'prot_vers': '2',
+        'cl_pwd': self.APPLICATION_PASSWORD,
+        'req_asw_type': 'STREAM',
+        }
+    self.filename = key..'-'..lang..'.mp3'
+    self.data['req_text'] = '\\vct=100\\ \\spd=160\\ '..text.encode('utf-8')
+end
+
+function Acapela:set_cache(self, value=True)
+    -- Enable Cache of file, if files already stored return this filename
+    self.cache = value
+end
+
+function Acapela:run(self)
+    -- run will call acapela API and and produce audio"""
+
+    -- check if file exists
+    if self.cache and os.path.isfile(self.DIRECTORY..self.filename) then
+        return self.filename
+    else
+        encdata = parse.urlencode(self.data)
+        request.urlretrieve(self.SERVICE_URL, self.DIRECTORY..self.filename, data=encdata)
+        return self.filename
     end
-
-    function set_cache(self, value=True)
-        -- Enable Cache of file, if files already stored return this filename
-        self.cache = value
-    end
-
-    function run(self)
-        -- run will call acapela API and and produce audio"""
-
-        -- check if file exists
-        if self.cache and os.path.isfile(self.DIRECTORY..self.filename) then
-            return self.filename
-        else
-            encdata = parse.urlencode(self.data)
-            request.urlretrieve(self.SERVICE_URL, self.DIRECTORY..self.filename, data=encdata)
-            return self.filename
-        end
-    end
+end
 
 --
 -- function main
 --
 function main()
+
+    --TODO: add parse init files
+
     acclogin = 'LOGIN'
     applogin = 'applogin'
     password = 'password'
     text = 'this is the text'
     language = 'EN'
-
-    quality = QUALITY
-    directory = DIRECTORY
-    url = SERVICE_URL
-    language = LANGUAGE
+    quality = '22k'
+    directory = '/tmp/'
 
     tts_acapela = Acapela(acclogin, applogin, password, url, quality, directory)
     gender = 'W'
     intonation = 'NORMAL'
-    tts_acapela.set_cache(False)
+    tts_acapela.set_cache(false)
     tts_acapela.prepare(text, language, gender, intonation)
     output_filename = tts_acapela.run()
 
