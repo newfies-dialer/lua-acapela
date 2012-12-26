@@ -22,30 +22,47 @@
 -- CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 -- SOFTWARE.
 
+local oo = require "loop.simple"
+
+
 lua_acapela_version = '0.1.0'
 
-ACCOUNT_LOGIN = 'EVAL_XXXX'
-APPLICATION_LOGIN = 'EVAL_XXXXXXX'
-APPLICATION_PASSWORD = 'XXXXXXXX'
 
-SERVICE_URL = 'http://vaas.acapela-group.com/Services/Synthesizer'
-LANGUAGE = 'EN'
-QUALITY = '22k'  -- 22k, 8k, 8ka, 8kmu
-DIRECTORY = '/tmp/'
+Acapela = oo.class{
+    -- default field values
+    ACCOUNT_LOGIN = 'EVAL_XXXX',
+    APPLICATION_LOGIN = 'EVAL_XXXXXXX',
+    APPLICATION_PASSWORD = 'XXXXXXXX',
+
+    SERVICE_URL = 'http://vaas.acapela-group.com/Services/Synthesizer',
+    LANGUAGE = 'EN',
+    QUALITY = '22k',  -- 22k, 8k, 8ka, 8kmu
+    DIRECTORY = '/tmp/',
+
+    -- Properties
+    TTS_ENGINE = nil,
+    filename = nil,
+    cache = true,
+    data = {}
+}
+
+function Acapela:__init(account_login, application_login, application_password, service_url, quality, directory)
+    -- constructor
+    return oo.rawnew(self, {
+        TTS_ENGINE = 'ACAPELA'
+        ACCOUNT_LOGIN = account_login
+        APPLICATION_LOGIN = application_login
+        APPLICATION_PASSWORD = application_password
+        SERVICE_URL = service_url
+        QUALITY = quality
+        DIRECTORY = directory or ''
+    })
+end
+
 
 
 class Acapela(object):
-    -- Properties
-    TTS_ENGINE = nil
-    ACCOUNT_LOGIN = nil
-    APPLICATION_LOGIN = nil
-    APPLICATION_PASSWORD = nil
-    SERVICE_URL = nil
-    QUALITY = nil
-    DIRECTORY = ''
-    filename = nil
-    cache = true
-    data = {}
+
 
     -- Available voices list
     -- http://www.acapela-vaas.com/ReleasedDocumentation/voices_list.php
@@ -58,16 +75,6 @@ class Acapela(object):
         'BR': {'W': {'NORMAL': 'marcia'}},
         }
 
-    function init(self, account_login, application_login, application_password, service_url, quality, directory='')
-        -- Construct Acapela TTS
-        self.TTS_ENGINE = 'ACAPELA'
-        self.ACCOUNT_LOGIN = account_login
-        self.APPLICATION_LOGIN = application_login
-        self.APPLICATION_PASSWORD = application_password
-        self.SERVICE_URL = service_url
-        self.QUALITY = quality
-        self.DIRECTORY = directory
-    end
 
     function prepare(self, text, lang, gender, intonation)
         -- Prepare Acapela TTS
