@@ -22,15 +22,54 @@
 -- CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 -- SOFTWARE.
 
+
 local oo = require "loop.simple"
 local inspect = require 'inspect'
 require "md5"
 require "lfs"
+require "curl"
 
 
 lua_acapela_version = '0.1.0'
 
 
+-- Check file exists and readable
+function file_exists(path)
+    local attr = lfs.attributes(path)
+    if (attr ~= nil) then
+        return true
+    else
+        return false
+    end
+end
+
+--
+-- Get an url and save result to file
+--
+function wget(url, outputfile)
+    -- open output file
+    f = io.open(outputfile, "w")
+
+    local text = {}
+    local function writecallback(str)
+        f:write(str)
+        return string.len(str)
+    end
+    local c = curl.easy_init()
+    c:setopt(curl.OPT_URL, url)
+    c:setopt(curl.OPT_WRITEFUNCTION, writecallback)
+    c:setopt(curl.OPT_USERAGENT, "luacurl-agent/1.0")
+    c:perform()
+
+    -- close output file
+    f:close()
+    return table.concat(text,'')
+end
+
+
+--
+-- Acapela Class
+--
 Acapela = oo.class{
     -- default field values
     ACCOUNT_LOGIN = 'EVAL_XXXX',
@@ -47,16 +86,7 @@ Acapela = oo.class{
     filename = nil,
     cache = true,
     data = {},
-        -- Available voices list
-    -- http://www.acapela-vaas.com/ReleasedDocumentation/voices_list.php
-    langs = {
-        'EN': {'W': {'NORMAL': 'rachel'}, 'M': {'NORMAL': 'margaux'}},
-        'US': {'W': {'NORMAL': 'heather'}, 'M': {'NORMAL': 'ryan'}},
-        'ES': {'W': {'NORMAL': 'ines'}, 'M': {'NORMAL': 'antonio'}},
-        'FR': {'W': {'NORMAL': 'alice'}, 'M': {'NORMAL': 'antoine'}},
-        'PT': {'W': {'NORMAL': 'celia'}},
-        'BR': {'W': {'NORMAL': 'marcia'}},
-        }
+    langs = {},
 }
 
 
@@ -73,7 +103,20 @@ function Acapela:__init(account_login, application_login, application_password, 
 end
 
 
-function Acapela:prepare(self, text, lang, gender, intonation)
+function Acapela:prepare(text, lang, gender, intonation)
+
+    -- Available voices list
+    -- http://www.acapela-vaas.com/ReleasedDocumentation/voices_list.php
+
+    self.langs = {
+        EN = {W = {NORMAL = 'rachel'}, M = {NORMAL = 'margaux'}},
+        US = {W = {NORMAL = 'heather'}, M = {NORMAL = 'ryan'}},
+        ES = {W = {NORMAL = 'ines'}, M = {NORMAL = 'antonio'}},
+        FR = {W = {NORMAL = 'alice'}, M = {NORMAL = 'antoine'}},
+        PT = {W = {NORMAL = 'celia'}},
+        BR = {W = {NORMAL = 'marcia'}},
+    }
+
     -- Prepare Acapela TTS
     if string.len(text) == 0 then
         return false
@@ -88,42 +131,61 @@ function Acapela:prepare(self, text, lang, gender, intonation)
     self.filename = key..'-'..lang..'.mp3'
 
     self.data = {
-        'cl_env': 'LUA',
-        'req_snd_id': key,
-        'cl_login': self.ACCOUNT_LOGIN,
-        'cl_vers': '1-30',
-        'req_err_as_id3': 'yes',
-        'req_voice': req_voice,
-        'cl_app': self.APPLICATION_LOGIN,
-        'prot_vers': '2',
-        'cl_pwd': self.APPLICATION_PASSWORD,
-        'req_asw_type': 'STREAM',
-        'req_text': '\\vct=100\\ \\spd=160\\ '..text,
+        cl_env = 'LUA',
+        req_snd_id = key,
+        cl_login = self.ACCOUNT_LOGIN,
+        cl_vers = '1-30',
+        req_err_as_id3 = 'yes',
+        req_voice = req_voice,
+        cl_app = self.APPLICATION_LOGIN,
+        prot_vers = '2',
+        cl_pwd = self.APPLICATION_PASSWORD,
+        req_asw_type = 'STREAM',
+        req_text = '\\vct=100\\ \\spd=160\\ '..text,
     }
 end
 
-function Acapela:set_cache(self, value)
+function Acapela:set_cache(value)
     -- Enable Cache of file, if files already stored return this filename
     self.cache = value
 end
 
-function Acapela:run(self)
+function Acapela:run()
     -- Run will call acapela API and reproduce audio
 
     -- Check if file exists
-    if self.cache and os.path.isfile(self.DIRECTORY..self.filename) then
+    if self.cache and file_exists(self.DIRECTORY..self.filename) then
         return self.filename
     else
-        encdata = parse.urlencode(self.data)
-        request.urlretrieve(self.SERVICE_URL, self.DIRECTORY..self.filename, data=encdata)
-        return self.filename
+        --encdata = parse.urlencode(self.data)
+        --request.urlretrieve(self.SERVICE_URL, self.DIRECTORY..self.filename, data=encdata)
+        --get_params = table.concat(self.data, "&")
+        get_params = ''
+        for k, v in pairs(self.data) do
+            if get_params ~= '' then
+                get_params = get_params..'&'
+            end
+            get_params = get_params..tostring(k)..'='..v
+        end
+
+        print(get_params)
+        print(inspect(self.data))
+
+        wget(self.SERVICE_URL..'?'..get_params, self.DIRECTORY..self.filename)
+        if file_exists(self.DIRECTORY..self.filename) then
+            print("Success : "..self.DIRECTORY..self.filename)
+        else
+            print("Didn't work!!!")
+        end
+        return self.DIRECTORY..self.filename
     end
 end
 
+
 --
--- function main
+-- Test
 --
-function main()
+if true then
 
     --TODO: add parse init files
 
@@ -138,16 +200,10 @@ function main()
     tts_acapela = Acapela(acclogin, applogin, password, url, quality, directory)
     gender = 'W'
     intonation = 'NORMAL'
-    tts_acapela.set_cache(false)
-    tts_acapela.prepare(text, language, gender, intonation)
-    output_filename = tts_acapela.run()
+    tts_acapela:set_cache(false)
+    tts_acapela:prepare(text, language, gender, intonation)
+    output_filename = tts_acapela:run()
 
     print('Recorded TTS to '..directory..output_filename)
 
---
--- Test
---
-if false then
-    -- run function
-    main()
 end
