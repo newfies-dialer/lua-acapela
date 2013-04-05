@@ -1,7 +1,13 @@
 Changelog
 =========
 
+0.2 (2013-04-05)
+----------------
+
+    * Switch dependencies to curl to http://msva.github.com/lua-curl/
+
+
 0.1 (2012-12-21)
 ----------------
 
-* First release.
+    * First release.

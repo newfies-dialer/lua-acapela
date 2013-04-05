@@ -51,6 +51,27 @@ Features
 * Provide voices of different gender and intonation
 
 
+Dependencies
+------------
+
+There is few dependencies md5, lfs and lua-curl.
+We use this version of lua curl : http://msva.github.com/lua-curl/
+
+To install md5 and lfs::
+
+    luarocks install md5
+    luarocks install luafilesystem
+
+
+To install lua-curl::
+
+    cd /usr/src/
+    wget https://github.com/msva/lua-curl/archive/master.zip -O lua-curl.zip
+    unzip lua-curl.zip
+    cd lua-curl-master
+    cmake . && make install
+
+
 Feedback
 --------
 

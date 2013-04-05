@@ -28,7 +28,7 @@ require "md5"
 require "lfs"
 require "cURL"
 
-lua_acapela_version = '0.1.0'
+lua_acapela_version = '0.2.0'
 
 
 -- Check file exists and readable
