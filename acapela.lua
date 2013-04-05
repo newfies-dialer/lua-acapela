@@ -1,6 +1,6 @@
 --
 -- acapela.lua - Lua wrapper for text-to-speech synthesis with Acapela
--- Copyright (C) 2012 Arezqui Belaid <areski@gmail.com>
+-- Copyright (C) 2012-2013 Arezqui Belaid <areski@gmail.com>
 --
 -- Permission is hereby granted, free of charge, to any person
 -- obtaining a copy of this software and associated documentation files
@@ -22,13 +22,11 @@
 -- CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 -- SOFTWARE.
 
-
 local oo = require "loop.simple"
 local inspect = require 'inspect'
 require "md5"
 require "lfs"
-require "curl"
-
+require "cURL"
 
 lua_acapela_version = '0.1.0'
 
@@ -55,11 +53,12 @@ function wget(url, outputfile)
         f:write(str)
         return string.len(str)
     end
-    local c = curl.easy_init()
-    c:setopt(curl.OPT_URL, url)
-    c:setopt(curl.OPT_WRITEFUNCTION, writecallback)
-    c:setopt(curl.OPT_USERAGENT, "luacurl-agent/1.0")
-    c:perform()
+
+    local c = cURL.easy_init()
+    -- setup url
+    c:setopt_url(url)
+    -- perform, invokes callbacks
+    c:perform({writefunction = writecallback})
 
     -- close output file
     f:close()
@@ -201,10 +200,7 @@ end
 --
 if false then
 
-    --TODO: add parse init files
-
     require "acapela_config"
-
     if ACCOUNT_LOGIN == nil then
         ACCOUNT_LOGIN = 'LOGIN'
         APPLICATION_LOGIN = 'applogin'
@@ -227,4 +223,7 @@ if false then
     output_filename = tts_acapela:run()
 
     print('Recorded TTS : '..output_filename)
+
+    -- Test Wget
+    -- wget('http://cdn.newfies-dialer.org.s3.amazonaws.com/wp-content/uploads/2013/03/call-transfer-do_not_call_list.png', '/tmp/test.png')
 end
