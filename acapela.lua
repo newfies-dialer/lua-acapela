@@ -23,8 +23,7 @@
 -- SOFTWARE.
 
 local oo = require "loop.simple"
-local inspect = require 'inspect'
-require "md5"
+local md5 = require "md5"
 require "lfs"
 require "cURL"
 
@@ -179,10 +178,6 @@ function Acapela:run()
         end
 
         wget(self.SERVICE_URL..'?'..get_params, self.DIRECTORY..self.filename)
-
-        -- Debug
-        -- print(self.SERVICE_URL..'?'..get_params)
-        -- print(inspect(self.data))
 
         if file_exists(self.DIRECTORY..self.filename) then
             return self.DIRECTORY..self.filename
