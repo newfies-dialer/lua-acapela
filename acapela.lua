@@ -1,6 +1,6 @@
 --
 -- acapela.lua - Lua wrapper for text-to-speech synthesis with Acapela
--- Copyright (C) 2012-2013 Arezqui Belaid <areski@gmail.com>
+-- Copyright (C) 2012-2014 Arezqui Belaid <areski@gmail.com>
 --
 -- Permission is hereby granted, free of charge, to any person
 -- obtaining a copy of this software and associated documentation files
@@ -22,7 +22,6 @@
 -- CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 -- SOFTWARE.
 
-local oo = require "loop.simple"
 local md5 = require "md5"
 require "lfs"
 require "cURL"
@@ -46,19 +45,16 @@ end
 function wget(url, outputfile)
     -- open output file
     f = io.open(outputfile, "w")
-
     local text = {}
     local function writecallback(str)
         f:write(str)
         return string.len(str)
     end
-
     local c = cURL.easy_init()
     -- setup url
     c:setopt_url(url)
     -- perform, invokes callbacks
     c:perform({writefunction = writecallback})
-
     -- close output file
     f:close()
     return table.concat(text,'')
@@ -80,7 +76,8 @@ end
 --
 -- Acapela Class
 --
-Acapela = oo.class{
+
+local Acapela = {
     -- default field values
     ACCOUNT_LOGIN = 'EVAL_XXXX',
     APPLICATION_LOGIN = 'EVAL_XXXXXXX',
@@ -98,18 +95,28 @@ Acapela = oo.class{
     langs = {},
 }
 
+-- Meta information
+Acapela._COPYRIGHT   = "Copyright (C) 2014 Areski"
+Acapela._DESCRIPTION = "Lua wrapper for text-to-speech synthesis with Acapela"
+Acapela._VERSION     = "lua-acapela 0.3.0"
 
-function Acapela:__init(account_login, application_login, application_password, url, quality, directory)
-    -- constructor
-    return oo.rawnew(self, {
-        ACCOUNT_LOGIN = account_login,
-        APPLICATION_LOGIN = application_login,
-        APPLICATION_PASSWORD = application_password,
-        SERVICE_URL = url,
-        QUALITY = quality,
-        DIRECTORY = directory or '',
-    })
+
+function Acapela:new (o)
+    o = o or {}   -- create object if user does not provide one
+    setmetatable(o, self)
+    self.__index = self
+    return o
 end
+
+-- function Acapela:init(account_login, application_login, application_password, url, quality, directory)
+--     -- constructor
+--     self.ACCOUNT_LOGIN = account_login
+--     self.APPLICATION_LOGIN = application_login
+--     self.APPLICATION_PASSWORD = application_password
+--     self.SERVICE_URL = url
+--     self.QUALITY = quality
+--     self.DIRECTORY = directory or ''
+-- end
 
 
 function Acapela:prepare(text, lang, gender, intonation)
@@ -189,36 +196,4 @@ function Acapela:run()
     end
 end
 
-
---
--- Test
---
-if false then
-
-    require "acapela_config"
-    if ACCOUNT_LOGIN == nil then
-        ACCOUNT_LOGIN = 'LOGIN'
-        APPLICATION_LOGIN = 'applogin'
-        APPLICATION_PASSWORD = 'password'
-        SERVICE_URL = 'http://vaas.acapela-group.com/Services/Synthesizer'
-        quality = '22k'
-        gender = 'W'
-        intonation = 'NORMAL'
-    end
-
-    directory = '/tmp/'
-    text = 'Please say this text via Acapela'
-    language = 'EN'
-
-
-    tts_acapela = Acapela(ACCOUNT_LOGIN, APPLICATION_LOGIN, APPLICATION_PASSWORD, SERVICE_URL, QUALITY, directory)
-
-    tts_acapela:set_cache(false)
-    tts_acapela:prepare(text, language, ACAPELA_GENDER, ACAPELA_INTONATION)
-    output_filename = tts_acapela:run()
-
-    print('Recorded TTS : '..output_filename)
-
-    -- Test Wget
-    -- wget('http://cdn.newfies-dialer.org.s3.amazonaws.com/wp-content/uploads/2013/03/call-transfer-do_not_call_list.png', '/tmp/test.png')
-end
+return Acapela

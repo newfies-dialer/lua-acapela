@@ -1,6 +1,13 @@
 Changelog
 =========
 
+
+0.3 (2014-06-25)
+----------------
+
+    * Remove `loop` dependencies as not compatible with lua 5.2
+
+
 0.2 (2013-04-05)
 ----------------
 
