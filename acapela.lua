@@ -1,6 +1,6 @@
 --
 -- acapela.lua - Lua wrapper for text-to-speech synthesis with Acapela
--- Copyright (C) 2012-2014 Arezqui Belaid <areski@gmail.com>
+-- Copyright (C) 2012-2015 Arezqui Belaid <areski@gmail.com>
 --
 -- Permission is hereby granted, free of charge, to any person
 -- obtaining a copy of this software and associated documentation files
@@ -26,7 +26,7 @@ local md5 = require "md5"
 require "lfs"
 require "cURL"
 
-lua_acapela_version = '0.2.1'
+lua_acapela_version = '0.2.2'
 
 
 -- Check file exists and readable
