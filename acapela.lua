@@ -125,7 +125,7 @@ function Acapela:prepare(text, lang, gender, intonation)
     -- http://www.acapela-vaas.com/ReleasedDocumentation/voices_list.php
 
     self.langs = {
-        EN = {W = {NORMAL = 'rachel'}, M = {NORMAL = 'margaux'}},
+        EN = {W = {NORMAL = 'lucy'}, M = {NORMAL = 'graham'}},
         US = {W = {NORMAL = 'heather'}, M = {NORMAL = 'ryan'}},
         ES = {W = {NORMAL = 'ines'}, M = {NORMAL = 'antonio'}},
         FR = {W = {NORMAL = 'alice'}, M = {NORMAL = 'antoine'}},
@@ -143,7 +143,6 @@ function Acapela:prepare(text, lang, gender, intonation)
 
     key = 'acapela'..'_'..hash
     req_voice = self.langs[lang][gender][intonation]..self.QUALITY
-    --req_voice = 'lucy22k'
     self.filename = key..'-'..lang..'.mp3'
 
     self.data = {
