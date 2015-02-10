@@ -5,7 +5,7 @@
 Acapela = require "acapela"
 require "acapela_config"
 
-print(Acapela)
+-- print(Acapela)
 
 if ACCOUNT_LOGIN == nil then
     ACCOUNT_LOGIN = 'LOGIN'
@@ -34,7 +34,9 @@ tts_acapela:set_cache(false)
 tts_acapela:prepare(text, language, ACAPELA_GENDER, ACAPELA_INTONATION)
 output_filename = tts_acapela:run()
 
+print('')
 print('Recorded TTS : '..tostring(output_filename))
+print('')
 
 -- Test Wget
 -- wget('http://cdn.newfies-dialer.org.s3.amazonaws.com/wp-content/uploads/2013/03/call-transfer-do_not_call_list.png', '/tmp/test.png')

@@ -151,7 +151,7 @@ function Acapela:prepare(text, lang, gender, intonation)
         req_snd_id = key,
         cl_login = self.ACCOUNT_LOGIN,
         cl_vers = '1-30',
-        req_err_as_id3 = 'yes',
+        -- req_err_as_id3 = 'yes',
         req_voice = req_voice,
         cl_app = self.APPLICATION_LOGIN,
         prot_vers = '2',
@@ -184,6 +184,7 @@ function Acapela:run()
             get_params = get_params..tostring(k)..'='..url_encode(v)
         end
 
+        print("HTTP CALL: "..self.SERVICE_URL..'?'..get_params, self.DIRECTORY..self.filename)
         wget(self.SERVICE_URL..'?'..get_params, self.DIRECTORY..self.filename)
 
         if file_exists(self.DIRECTORY..self.filename) then
