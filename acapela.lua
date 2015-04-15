@@ -26,8 +26,6 @@ local md5 = require "md5"
 require "lfs"
 require "cURL"
 
-lua_acapela_version = '0.2.2'
-
 
 -- Check file exists and readable
 function file_exists(path)
@@ -96,9 +94,9 @@ local Acapela = {
 }
 
 -- Meta information
-Acapela._COPYRIGHT   = "Copyright (C) 2014 Areski"
+Acapela._COPYRIGHT   = "Copyright (C) 2014-2015 Areski"
 Acapela._DESCRIPTION = "Lua wrapper for text-to-speech synthesis with Acapela"
-Acapela._VERSION     = "lua-acapela 0.3.0"
+Acapela._VERSION     = "lua-acapela 0.3.1"
 
 
 function Acapela:new (o)
@@ -126,7 +124,7 @@ function Acapela:prepare(text, lang, gender, intonation)
 
     self.langs = {
         EN = {W = {NORMAL = 'lucy'}, M = {NORMAL = 'graham'}},
-        US = {W = {NORMAL = 'heather'}, M = {NORMAL = 'ryan'}},
+        US = {W = {NORMAL = 'karen'}, M = {NORMAL = 'ryan'}},
         ES = {W = {NORMAL = 'ines'}, M = {NORMAL = 'antonio'}},
         FR = {W = {NORMAL = 'alice'}, M = {NORMAL = 'antoine'}},
         PT = {W = {NORMAL = 'celia'}},
